@@ -1,11 +1,14 @@
 import Scraping
+from Singleton import Singleton
+import re
 
-
+# @Singleton
 class Gearbest(Scraping.Scraping):
 
     def do_scraping(self, url):
         result = super(Gearbest,self).do_scraping(url)
-        return result.text.lstrip().splitlines()[0]
+        text= result.text.lstrip().splitlines()[0]
+        return float(re.findall(r"\d+\.\d+", text)[0])
 
         # tables = soup.find_all('table')
         # for table in tables:

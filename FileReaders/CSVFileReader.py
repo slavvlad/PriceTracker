@@ -1,23 +1,23 @@
 import FileReaders.SourceFileReader
 import csv
-import ListingDetails
+from ListingDetails import ListingDetails
+from Singleton import Singleton
 
+@Singleton
 class CSVFileReader(FileReaders.SourceFileReader.FileReader):
 
-    def __init__(self,path):
-        super(CSVFileReader, self).__init__(path)
+    # def __init__(self,path):
+    #     super(CSVFileReader, self).__init__(path)
     def read(self):
         result=[]
         with open(self.file_path, 'rb') as csvfile:
             file_reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+            next(file_reader)#skip the headers
             for row in file_reader:
-                ls=ListingDetails()
-                ls.supplier = row["supplier"]
-                ls.url = row["url"]
-                ls.cost = row["price"]
-                ls.shipping = row["shipping"]
-                result.append(ls)
+                ls=ListingDetails(row[0],row[1],row[2],row[3],None)
 
+                result.append(ls)
+        return result
 
 
 
