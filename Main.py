@@ -10,16 +10,35 @@ Options:
 from Suppliers import GearBest
 from FileReaders.CSVFileReader import CSVFileReader
 from docopt import docopt
+import Loger
 
 if __name__ == '__main__':
+    #define the suppliers dictionary when the key is the supplier name
     suppliers ={'gearbest': GearBest.Gearbest()}
     arguments = docopt(__doc__)
+    #initialize the csv reader with path from command line argument
     file_reader= CSVFileReader(arguments['<path>'])
+    #read the csv file
     lists = file_reader.read()
-    for list in lists:
-        updated_price = suppliers[list.supplier.lower()].do_scraping(list.url)
+    for list in lists:# iterate the all item
+        updated_price = suppliers[list.supplier.lower()].do_scraping(list.url)#get actual price of item from the site
         if updated_price>float(list.price):
-            print "problem"
+            Loger.logger.warn('The url {} price has been changed from {} to {}'.format(list.url,list.price,updated_price))# to do somthing
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # base = GearBest.Gearbest()
     # var = base.do_scraping("https://www.gearbest.com/office-standing-desk/pp_641202.html?wid=1433363")
     # print var
