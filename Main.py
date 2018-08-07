@@ -8,15 +8,16 @@ Options:
 
 '''
 
-from Suppliers import GearBest
+from Suppliers import GearBest, DX
 from FileReaders.CSVFileReader import CSVFileReader
 from docopt import docopt
 import Loger
 import time
 
+
 if __name__ == '__main__':
     #define the suppliers dictionary when the key is the supplier name
-    suppliers ={'gearbest': GearBest.Gearbest()}
+    suppliers ={'gearbest': GearBest.Gearbest(),'dx': DX.DX() }
     arguments = docopt(__doc__)
     #initialize the csv reader with path from command line argument
     file_reader= CSVFileReader(arguments['<path>'])
@@ -25,7 +26,7 @@ if __name__ == '__main__':
         lists = file_reader.read()
         for list in lists:# iterate the all item
             updated_price = suppliers[list.supplier.lower()].do_scraping(list.url)#get actual price of item from the site
-            if updated_price>float(list.price):
+            if updated_price<>float(list.price):
                 Loger.logger.warn('The url {} price has been changed from {} to {}'.format(list.url,list.price,updated_price))# to do somthing
         time.sleep(float(arguments['<timer>']))
 
