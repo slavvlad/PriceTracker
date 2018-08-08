@@ -15,20 +15,88 @@ import Loger
 import time
 
 
+
+
+import win32serviceutil
+import win32service
+import win32event
+import servicemanager
+import socket
+
+def load_config():
+    from ConfigParser import SafeConfigParser
+    parser = SafeConfigParser()
+    parser.read(r'C:\Users\vladi\PycharmProjects\PriceTracker\config.ini')
+    result = (parser.get('initialize', 'svc_path'),parser.get('initialize', 'time_out_in_min'))
+    print result
+    return result
+
+def main_func(path):
+    Loger.logger.info('The price tracker was started')
+    # define the suppliers dictionary when the key is the supplier name
+    suppliers = {'gearbest': GearBest.Gearbest(), 'dx': DX.DX()}
+
+    #arguments = docopt(__doc__)
+    # initialize the csv reader with path from command line argument
+    file_reader = CSVFileReader(path)#(arguments['<path>'])
+
+        # read the csv file
+    lists = file_reader.read()
+    for list in lists:  # iterate the all item
+        updated_price = suppliers[list.supplier.lower()].do_scraping(
+            list.url)  # get actual price of item from the site
+        if updated_price <> float(list.price):
+            Loger.logger.warn('The url {} price has been changed from {} to {}'.format(list.url, list.price,
+                                                                                           updated_price))  # to do somthing
+
+    Loger.logger.info('The price tracker was finished')
+
+
+
+
+
+
+
+
+
+class AppServerSvc (win32serviceutil.ServiceFramework):
+    _svc_name_ = "PriceTracker"
+    _svc_display_name_ = "Price Tracker for Listings"
+
+    def __init__(self,args):
+        win32serviceutil.ServiceFramework.__init__(self,args)
+        self.hWaitStop = win32event.CreateEvent(None,0,0,None)
+        socket.setdefaulttimeout(60)
+        self.isAlive = True
+
+    def SvcStop(self):
+        self.isAlive = False
+        self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
+        win32event.SetEvent(self.hWaitStop)
+
+    def SvcDoRun(self):
+        self.isAlive = True
+        servicemanager.LogMsg(servicemanager.EVENTLOG_INFORMATION_TYPE,
+                              servicemanager.PYS_SERVICE_STARTED,
+                              (self._svc_name_,''))
+        self.main()
+        win32event.WaitForSingleObject(self.hWaitStop, win32event.INFINITE)
+
+    def main(self):
+        while self.isAlive:
+            path, time_out = load_config()
+            main_func(path)
+            time.sleep(float(time_out)*60)
+
 if __name__ == '__main__':
-    #define the suppliers dictionary when the key is the supplier name
-    suppliers ={'gearbest': GearBest.Gearbest(),'dx': DX.DX() }
-    arguments = docopt(__doc__)
-    #initialize the csv reader with path from command line argument
-    file_reader= CSVFileReader(arguments['<path>'])
-    while True:
-        #read the csv file
-        lists = file_reader.read()
-        for list in lists:# iterate the all item
-            updated_price = suppliers[list.supplier.lower()].do_scraping(list.url)#get actual price of item from the site
-            if updated_price<>float(list.price):
-                Loger.logger.warn('The url {} price has been changed from {} to {}'.format(list.url,list.price,updated_price))# to do somthing
-        time.sleep(float(arguments['<timer>']))
+    win32serviceutil.HandleCommandLine(AppServerSvc)
+
+
+
+
+
+
+
 
 
 
