@@ -46,7 +46,7 @@ def main_func(path):
         updated_price = suppliers[list.supplier.lower()].do_scraping(
             list.url)  # get actual price of item from the site
         if updated_price <> float(list.price):
-            Loger.logger.warn('The url {} price has been changed from {} to {}'.format(list.url, list.price,
+            Loger.logger.warn('The url {} price has been changed from {} to {}'.format(list.ebay_url, list.price,
                                                                                            updated_price))  # to do somthing
 
     Loger.logger.info('The price tracker was finished')
