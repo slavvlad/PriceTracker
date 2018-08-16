@@ -27,11 +27,21 @@ import socket
 
 
 def load_config(category, key ):
-    from ConfigParser import SafeConfigParser
-    parser = SafeConfigParser()
-    parser.read(r'C:\Users\vladi\PycharmProjects\PriceTracker\config.ini')
-    result = parser.get(category, key)#(parser.get('initialize', 'svc_path'),parser.get('initialize', 'time_out_in_min'))
-    print result
+    import ConfigParser
+    import io
+    with open(r'C:\Users\vladi\PycharmProjects\PriceTracker\config.ini') as f:
+        sample_config = f.read()
+    config = ConfigParser.RawConfigParser(allow_no_value=True)
+    config.readfp(io.BytesIO(sample_config))
+    result= config.get(category, key)
+
+
+
+    # parser = SafeConfigParser()
+    # parser.read(r'C:\Users\vladi\PycharmProjects\PriceTracker\config.ini')
+    # result = parser.get(category, key)#(parser.get('initialize', 'svc_path'),parser.get('initialize', 'time_out_in_min'))
+    #
+    # print result
     return result
 
 def main_func(path):
@@ -115,4 +125,4 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
 if __name__ == '__main__':
     #main_func(load_config('initialize', 'svc_path'))
 
-     win32serviceutil.HandleCommandLine(AppServerSvc)
+    win32serviceutil.HandleCommandLine(AppServerSvc)
