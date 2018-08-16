@@ -7,8 +7,9 @@ class Gearbest(Scraping.Scraping):
 
     def do_scraping(self, url):
         result = super(Gearbest,self).do_scraping(url)
-        text= result.text.lstrip().splitlines()[0]
-        return float(re.findall(r"\d+\.\d+", text)[0])
+        name_box = result.find(attrs={"class": "price-loading goodsIntro_price js-currency js-panelIntroPrice"})
+        #text= result.text.lstrip().splitlines()[0]
+        return float(re.findall(r"\d+\.\d+", name_box.text)[0])
 
         # tables = soup.find_all('table')
         # for table in tables:
