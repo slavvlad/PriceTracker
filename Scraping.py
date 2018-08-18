@@ -2,6 +2,10 @@ import abc
 import requests
 from bs4 import BeautifulSoup
 
+# To get relevant cookies from supplier site make following:
+# click F12
+# Choose 'Network' in the header of console, when the first row in left panel and 'Headers' in header of right panel
+# Scrool down to 'Request Headers' and see 'Cookie' field
 
 def catch_exceptions(func):
     def func_wrapper(*args, **kwargs):
