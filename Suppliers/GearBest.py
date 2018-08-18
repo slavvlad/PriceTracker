@@ -5,6 +5,7 @@ import re
 # @Singleton
 class Gearbest(Scraping.Scraping):
 
+    @Scraping.catch_exceptions
     def do_scraping(self, url):
         result = super(Gearbest,self).do_scraping(url)
         name_box = result.find(attrs={"class": "price-loading goodsIntro_price js-currency js-panelIntroPrice"})

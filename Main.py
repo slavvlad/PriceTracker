@@ -44,11 +44,15 @@ def load_config(category, key ):
     # print result
     return result
 
+def extract_itemID_from_ulr(url):
+    return re.search(r'\d+', url).group()  # extract item id from url
+
 def main_func(path):
-    Loger.logger.info('The price tracker was started')
+    Loger.logger.info('Start check prices')
     # define the suppliers dictionary when the key is the supplier name
     suppliers = {'gearbest': GearBest.Gearbest(), 'dx': DX.DX()}
-    ebay = Ebay(load_config('Ebay','appid'), load_config('Ebay','certid'), load_config('Ebay','devid'), load_config('Ebay','token'))
+    ebay = Ebay(load_config('Ebay', 'appid'), load_config('Ebay', 'certid'), load_config('Ebay', 'devid'),
+                load_config('Ebay', 'token'))
 
     #arguments = docopt(__doc__)
     # initialize the csv reader with path from command line argument
@@ -62,12 +66,17 @@ def main_func(path):
 
         actual_price = suppliers[list.supplier.lower()].do_scraping(
             list.url)  # get actual price of item from the site
-        if actual_price <> float(list.price):
+        if actual_price == -1:
+            #failed to extract data from url
+            Loger.logger.warning('Failed to scrap information from {}\n Set stock to 0 ')
+            item_id = extract_itemID_from_ulr(list.ebay_url)
+            ebay.update_price(item_id, to_price)  # save the new prise on ebay
+        elif actual_price <> float(list.price):
             #the price has been changed
             if list.ebay_url<>'':
-                item_id = re.search(r'\d+', list.ebay_url).group() #extruct item id from url
+                item_id = extract_itemID_from_ulr(list.ebay_url)
                 try:
-                    to_price = ebay.get_ebay_price(item_id)+ (actual_price-float(list.price))#calculate the new price
+                    to_price = ebay.get_ebay_price(item_id) + (actual_price-float(list.price))#calculate the new price
 
                 except:
                     Loger.logger.error('Failed to get current ebay price for listing {}. Skipping the price comparing'.format(list.ebay_url))
@@ -82,7 +91,7 @@ def main_func(path):
 
 
     file_reader.write(lists)
-    Loger.logger.info('The price tracker was finished')
+    Loger.logger.info('Finished check prices')
 
 
 
@@ -116,13 +125,16 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
         win32event.WaitForSingleObject(self.hWaitStop, win32event.INFINITE)
 
     def main(self):
+
         path, time_out = load_config('initialize', 'svc_path'), load_config('initialize', 'time_out_in_min')
+        Loger.logger.info('The price tracker was started with time_out {}'.format(time_out))
         while self.isAlive:
 
             main_func(path)
             time.sleep(float(time_out)*60)
 
+
 if __name__ == '__main__':
-    #main_func(load_config('initialize', 'svc_path'))
+    # main_func(load_config('initialize', 'svc_path'))
 
     win32serviceutil.HandleCommandLine(AppServerSvc)
