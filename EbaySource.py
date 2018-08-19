@@ -27,3 +27,9 @@ class Ebay:
         response = tranding_api.execute('GetItem', storeData)
         item_deatails = response.dict()['Item']
         return float(item_deatails['StartPrice']['value'])
+
+
+    def update_staock(self,item_id,quantity):
+        tranding_api = Trading(config_file=None, appid=self.appid, certid=self.certid, token=self.token)
+        request = {'Item':{'ItemID':item_id,'Quantity':quantity}}
+        tranding_api.execute('ReviseFixedPriceItem', request)

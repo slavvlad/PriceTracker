@@ -8,7 +8,7 @@ Options:
 
 '''
 from EbaySource import Ebay
-from Suppliers import GearBest, DX
+from Suppliers import GearBest, DX, TMart
 from FileReaders.CSVFileReader import CSVFileReader
 from docopt import docopt
 import Loger
@@ -50,7 +50,7 @@ def extract_itemID_from_ulr(url):
 def main_func(path):
     Loger.logger.info('Start check prices')
     # define the suppliers dictionary when the key is the supplier name
-    suppliers = {'gearbest': GearBest.Gearbest(), 'dx': DX.DX()}
+    suppliers = {'gearbest': GearBest.Gearbest(), 'dx': DX.DX(), 'tmart': TMart.Tmart()}
     ebay = Ebay(load_config('Ebay', 'appid'), load_config('Ebay', 'certid'), load_config('Ebay', 'devid'),
                 load_config('Ebay', 'token'))
 
@@ -69,8 +69,9 @@ def main_func(path):
         if actual_price == -1:
             #failed to extract data from url
             Loger.logger.warning('Failed to scrap information from {}\n Set stock to 0 ')
-            item_id = extract_itemID_from_ulr(list.ebay_url)
-            ebay.update_price(item_id, to_price)  # save the new prise on ebay
+            if list.ebay_url <> '':
+                item_id = extract_itemID_from_ulr(list.ebay_url)
+                ebay.update_staock(item_id, 0)  # save the new prise on ebay
         elif actual_price <> float(list.price):
             #the price has been changed
             if list.ebay_url<>'':
@@ -135,6 +136,6 @@ class AppServerSvc (win32serviceutil.ServiceFramework):
 
 
 if __name__ == '__main__':
-    # main_func(load_config('initialize', 'svc_path'))
+    #main_func(load_config('initialize', 'svc_path'))
 
     win32serviceutil.HandleCommandLine(AppServerSvc)
