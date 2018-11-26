@@ -10,3 +10,6 @@ class Tmart(Scraping.Scraping):
         name_box = result.find(attrs={"class": "font36 strong font-light-red"})
         #text= result.text.lstrip().splitlines()[0]
         return float(re.findall(r"\d+\.\d+", name_box.text)[0])
+
+    def is_in_stock(self,url):
+        pass

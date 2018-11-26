@@ -63,12 +63,18 @@ def main_func(path):
         # read the csv file
     lists = file_reader.read()
     for list in lists:  # iterate the all item
+        # Check stock
+        if list.ebay_url <> '':
+            is_in_stock = suppliers[list.supplier.lower()].is_in_stock(list.url)
+            item_id = extract_itemID_from_ulr(list.ebay_url)
+            ebay.update_staock(item_id, 1 if is_in_stock else 0)
 
+        #get actual price from supplier site
         actual_price = suppliers[list.supplier.lower()].do_scraping(
             list.url)  # get actual price of item from the site
         if actual_price == -1:
             #failed to extract data from url
-            Loger.logger.warning('Failed to scrap information from {}\n Set stock to 0 ')
+            Loger.logger.warning('Failed to scrap information from {}'.format(list.url))
             if list.ebay_url <> '':
                 item_id = extract_itemID_from_ulr(list.ebay_url)
                 ebay.update_staock(item_id, 0)  # save the new prise on ebay
@@ -93,10 +99,6 @@ def main_func(path):
 
     file_reader.write(lists)
     Loger.logger.info('Finished check prices')
-
-
-
-
 
 
 

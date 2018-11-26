@@ -11,3 +11,6 @@ class DX(Scraping.Scraping):
         name_box = result.find( attrs={"class": "fl","id":"price"})
 
         return float(name_box.text)
+
+    def is_in_stock(self,url):
+        pass
